@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Letterly AI – Instant Essays & Letters for Students</title>
+  <meta name="description" content="Generate polished application letters, NYSC requests, scholarship essays, and more with AI. Built for Nigerian students & professionals." />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- jsPDF for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-/F0QnjbACRe6I6kdISWkjgG++7UTKtVuxzCfs3GOqf8wV8Y8n4A9c57fn4t2r0LqOyu2t5tfqWRw3i9jXy4C9A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <style>
+    :root {
+      --radius: 16px;
+      --gap: 1rem;
+      --brand: #2563EB;
+      --brand-hover: #1E40AF;
+      --bg: #F9FAFB;
+      --card-bg: #FFFFFF;
+      --text-primary: #111827;
+      --text-body: #374151;
+      --text-muted: #6B7280;
+      --placeholder: #9CA3AF;
+      --danger: #DC2626;
+      --success: #16A34A;
+      --border: #E5E7EB;
+      --font: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+    *{box-sizing:border-box;}
+    html,body{margin:0;padding:0;font-family:var(--font);background:var(--bg);color:var(--text-primary);line-height:1.4;}
+    img{max-width:100%;display:block;}
+    a{text-decoration:none;color:var(--brand);}a:hover{color:var(--brand-hover);} 
+    /* Utilities */
+    .mx-auto{margin-left:auto;margin-right:auto;}
+    .text-center{text-align:center;}
+    .visually-hidden{position:absolute!important;left:-9999px!important;width:1px;height:1px;overflow:hidden;}
+
+    /* Layout wrapper widths */
+    .container{width:100%;max-width:1200px;padding:0 1.25rem;margin:0 auto;}
+
+    /* HERO -------------------------------------------------- */
+    .hero{position:relative;display:flex;align-items:center;justify-content:space-between;gap:2rem;min-height:480px;padding:4rem 1.25rem;background:#BE185D; /* fallback magenta behind image */ color:#fff;overflow:hidden;}
+    .hero::after{content:"";position:absolute;inset:0;background:rgba(17,24,39,.65); /* dark overlay for legibility */}
+    .hero-inner{position:relative;z-index:1;display:grid;grid-template-columns:1fr minmax(320px,560px);align-items:center;gap:2rem;width:100%;max-width:1200px;margin:0 auto;}
+    .hero-text h1{margin:0 0 1rem;font-size:clamp(2rem,5vw,2.5rem);font-weight:700;line-height:1.2;color:#fff;}
+    .hero-text p{margin:0 0 2rem;max-width:40ch;font-size:1.125rem;line-height:1.4;color:rgba(255,255,255,.9);} 
+    .hero-text .cta-btn{cursor:pointer;display:inline-block;padding:1rem 2.5rem;font-size:1.125rem;font-weight:600;border:none;border-radius:8px;background:var(--brand);color:#fff;transition:.15s;} 
+    .hero-text .cta-btn:hover{background:var(--brand-hover);} 
+    .hero-image-wrapper{width:100%;max-width:560px;}
+    .hero-image-wrapper img{border-radius:8px;height:auto;width:100%;}
+
+    /* FEATURES ---------------------------------------------- */
+    section{padding:5rem 0;}
+    .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:2rem;margin-top:3rem;}
+    .feature-card{background:var(--card-bg);padding:2rem;border:1px solid var(--border);border-radius:var(--radius);text-align:left;}
+    .feature-card h3{margin:0 0 .5rem;font-size:1.125rem;font-weight:600;color:var(--text-primary);} 
+    .feature-card p{margin:0;font-size:1rem;color:var(--text-body);} 
+
+    /* HOW IT WORKS ------------------------------------------ */
+    .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:2rem;margin-top:3rem;}
+    .step-item{text-align:center;padding:2rem;background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);} 
+    .step-item .step-num{width:48px;height:48px;margin:0 auto 1rem;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:1.125rem;} 
+    .step-item h4{margin:0 0 .5rem;font-size:1.125rem;font-weight:600;color:var(--text-primary);} 
+    .step-item p{margin:0;font-size:.95rem;color:var(--text-body);} 
+
+    /* CTA BAND ---------------------------------------------- */
+    .cta-band{background:var(--brand);color:#fff;text-align:center;padding:4rem 1.25rem;border-radius:0;}
+    .cta-band h2{margin:0 0 1rem;font-size:clamp(1.75rem,4vw,2.25rem);font-weight:700;line-height:1.2;}
+    .cta-band p{margin:0 0 2rem;font-size:1.125rem;color:rgba(255,255,255,.9);} 
+    .cta-band button{cursor:pointer;padding:1rem 2.5rem;font-size:1.125rem;font-weight:600;border:none;border-radius:8px;background:#fff;color:var(--brand);transition:.15s;} 
+    .cta-band button:hover{background:#f0f0f0;}
+
+    /* GENERATOR --------------------------------------------- */
+    #generator{padding:5rem 1.25rem;background:var(--bg);} 
+    #generator .card{max-width:720px;margin:0 auto;background:var(--card-bg);padding:2.5rem;border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 4px 16px rgb(0 0 0 / .05);} 
+    #generator h2{margin-top:0;margin-bottom:1rem;font-size:clamp(1.75rem,4vw,2rem);font-weight:700;color:var(--text-primary);} 
+    #generator ol{margin:0 0 2rem 1.25rem;padding:0;font-size:1rem;color:var(--text-body);line-height:1.5;} 
+    #generator form{display:grid;gap:1.5rem;} 
+    label{font-size:1rem;font-weight:500;color:var(--text-body);display:block;margin-bottom:.25rem;} 
+    select,input[type="text"],textarea{width:100%;padding:.9rem 1rem;font-size:1rem;font-weight:400;color:var(--text-primary);border:1px solid var(--border);border-radius:8px;background:#fff;} 
+    select:focus,input:focus,textarea:focus{outline:2px solid var(--brand-hover);outline-offset:2px;} 
+    textarea{min-height:100px;resize:vertical;} 
+    fieldset{border:1px solid var(--border);border-radius:8px;padding:1.25rem;margin:0;} 
+    fieldset legend{padding:0 .5rem;font-size:.95rem;font-weight:600;color:var(--text-muted);} 
+    .inline-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:1rem;} 
+
+    /* Generator buttons row */
+    .gen-actions{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:.5rem;}
+    .gen-actions button{cursor:pointer;padding:.85rem 1.75rem;font-size:1rem;font-weight:600;border:none;border-radius:8px;transition:.15s;}
+    .gen-actions .primary{background:var(--brand);color:#fff;}
+    .gen-actions .primary:hover{background:var(--brand-hover);} 
+    .gen-actions .secondary{background:#fff;color:var(--text-primary);border:1px solid var(--border);} 
+    .gen-actions .secondary:hover{background:#f3f4f6;} 
+    .gen-actions .danger{background:var(--danger);color:#fff;} 
+    .gen-actions .danger:hover{filter:brightness(.95);} 
+
+    .tip-text{margin-top:1rem;font-size:.95rem;color:var(--text-muted);} 
+
+    /* Output */
+    #output-wrapper{margin-top:2.5rem;display:none;}
+    #output-wrapper.active{display:block;}
+    #output-box{padding:1.5rem;border:1px solid var(--border);background:#fff;border-radius:8px;max-height:400px;overflow-y:auto;white-space:pre-wrap;line-height:1.5;font-family:monospace;font-size:.95rem;color:var(--text-primary);} 
+
+    /* FOOTER ----------------------------------------------- */
+    footer{margin-top:5rem;text-align:center;padding:3rem 1.25rem;font-size:.9rem;color:var(--text-muted);} 
+    footer strong{color:var(--text-body);} 
+
+    /* RESPONSIVE ------------------------------------------- */
+    @media (max-width:768px){
+      .hero{padding:3rem 1rem;text-align:center;}
+      .hero-inner{grid-template-columns:1fr;}
+      .hero-text{order:1;}
+      .hero-image-wrapper{order:2;max-width:420px;margin:0 auto;}
+      section{padding:4rem 0;}
+      #generator .card{padding:1.75rem;}
+      .gen-actions{flex-direction:column;align-items:stretch;}
+      .gen-actions button{width:100%;}
+    }
+    @media (max-width:480px){
+      .hero-text h1{font-size:2rem;}
+      .cta-band h2{font-size:1.75rem;}
+    }
+  </style>
+</head>
+<body>
+  <!-- HERO -->
+  <header id="top" class="hero" role="banner" aria-label="Letterly AI hero">
+    <div class="hero-inner">
+      <div class="hero-text">
+        <h1>Create Perfect Essays & Letters Instantly</h1>
+        <p>Powered by AI – designed for Nigerian students and professionals. Save time, reduce stress, and get polished content in seconds.</p>
+        <button class="cta-btn" data-scroll="#generator">Start Generating Now</button>
+      </div>
+      <div class="hero-image-wrapper">
+        <!-- Replace path below with your actual image location -->
+        <img src="assets/hero-ai-human-touch.jpg" alt="Human and robotic hand reaching toward each other – symbolizing AI support." />
+      </div>
+    </div>
+  </header>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="container text-center">
+      <h2 class="h2">Why Choose Our AI Letter Generator?</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <h3>Localized Templates</h3>
+          <p>Nigerian letters for NYSC, scholarships, job applications & more.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Customizable Tone</h3>
+          <p>Formal, semi-formal, simple English, or light Naija flavour.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Instant Downloads</h3>
+          <p>Copy text, export PDF, or save—no stress.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Student Friendly</h3>
+          <p>Lightweight. Works on low data connections.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how">
+    <div class="container text-center">
+      <h2 class="h2">Generate Letters in 3 Simple Steps</h2>
+      <div class="steps">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <h4>Select a Template</h4>
+          <p>Job, NYSC, scholarship & more.</p>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <h4>Enter Your Details</h4>
+          <p>Topic, name, school (optional).</p>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <h4>Generate & Export</h4>
+          <p>Copy or download as PDF.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA BAND -->
+  <section class="cta-band">
+    <h2>Start Writing Smarter</h2>
+    <p>Ready to create your letter in seconds? Let AI do the hard work for you.</p>
+    <button data-scroll="#generator">Generate Your Letter Now</button>
+  </section>
+
+  <!-- GENERATOR MAIN INTERFACE -->
+  <section id="generator" aria-labelledby="generator-heading">
+    <div class="card">
+      <h2 id="generator-heading">Generate Your Essay or Letter</h2>
+      <ol>
+        <li>Select a template (Job Application, NYSC Redeployment, etc.).</li>
+        <li>Describe your purpose or topic.</li>
+        <li>Add your name, school, or program (optional).</li>
+        <li>Choose the tone.</li>
+        <li>Click ‘Generate’ to get your content instantly.</li>
+      </ol>
+      <form id="generator-form">
+        <div>
+          <label for="template-select">Select Template</label>
+          <select id="template-select" required></select>
+        </div>
+        <div>
+          <label for="topic-input">Your Topic / Purpose</label>
+          <textarea id="topic-input" placeholder="e.g. Application for Marketing Manager position" required></textarea>
+        </div>
+        <fieldset>
+          <legend>Your details (optional but improves results)</legend>
+          <div class="inline-fields">
+            <div>
+              <label for="student-name">Full Name</label>
+              <input type="text" id="student-name" placeholder="Adamu Aisha Kutigi" />
+            </div>
+            <div>
+              <label for="student-school">School / Institution</label>
+              <input type="text" id="student-school" placeholder="Federal University of Technology Minna" />
+            </div>
+            <div>
+              <label for="student-program">Programme / Course</label>
+              <input type="text" id="student-program" placeholder="BSc Microbiology" />
+            </div>
+            <div>
+              <label for="student-location">Location (State)</label>
+              <input type="text" id="student-location" placeholder="Niger State" />
+            </div>
+          </div>
+        </fieldset>
+        <div>
+          <label for="tone-select">Tone</label>
+          <select id="tone-select">
+            <option value="formal">Formal Academic</option>
+            <option value="semi-formal">Semi-formal Student</option>
+            <option value="simple">Simple English</option>
+            <option value="pidgin-hybrid">English with light Naija flavour</option>
+          </select>
+        </div>
+        <div>
+          <label for="api-key-input">OpenAI API Key <span style="color:var(--danger);font-size:.85em;">(local only – do not share)</span></label>
+          <input type="text" id="api-key-input" placeholder="sk-..." />
+        </div>
+        <div class="gen-actions">
+          <button id="generate-btn" type="submit" class="primary">Generate</button>
+          <button id="copy-btn" type="button" class="secondary">Copy</button>
+          <button id="pdf-btn" type="button" class="secondary">Download as PDF</button>
+          <button id="reset-btn" type="button" class="danger">Clear</button>
+        </div>
+        <p class="tip-text"><strong>Tip:</strong> The more details you provide, the better the letter will be.</p>
+      </form>
+      <div id="output-wrapper">
+        <div id="output-box" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Built for <strong>3MTT Monthly Showcase</strong>. Free & open. Fork on GitHub. <a href="#" id="export-gist-link">Export as Gist</a>
+  </footer>
+
+<script>
+/*****************************************************
+ * Letterly AI – Front-end only demo
+ * Paste in your OpenAI API key at runtime.
+ * For public demos: create a proxy or mock (see below).
+ *****************************************************/
+
+const TEMPLATES=[
+  {id:'job-app',label:'Application Letter – Entry-Level Job',promptFrame:`Write a professional job application letter for the role described below. Audience: Nigerian employer. Include greeting, intro (course/school/skills), why I fit, request for interview, polite closing. 350-450 words.`},
+  {id:'nysc-relocate',label:'NYSC Redeployment Request',promptFrame:`Draft an NYSC redeployment request letter. Include details, current posting, reason (from topic), polite appeal, thanks. 250-350 words.`},
+  {id:'scholarship-essay',label:'Scholarship Motivation Essay',promptFrame:`Write a short scholarship motivation essay. Include background, academic interest, impact on community in Nigeria, future goals. 400-500 words.`},
+  {id:'fees-appeal',label:'School Fees Payment Appeal',promptFrame:`Write a respectful letter requesting extension/payment plan for school fees. Mention circumstances, commitment, proposed timeline, thanks. 250-350 words.`},
+  {id:'it-placement',label:'Industrial Training / SIWES Request',promptFrame:`Draft a letter requesting Industrial Training placement. Include programme duration, relevance to my course, willingness to learn. 250-400 words.`},
+  {id:'general-essay',label:'General Essay (Custom Topic)',promptFrame:`Write a short essay on the topic below. Structure: introduction, 2-3 key points, conclusion. Max 500 words.`}
+];
+
+const templateSelect=document.getElementById('template-select');
+TEMPLATES.forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=t.label;templateSelect.appendChild(o);});
+
+/* restore local values */
+(function restore(){['template-select','topic-input','student-name','student-school','student-program','student-location','tone-select','api-key-input'].forEach(id=>{const el=document.getElementById(id);if(!el)return;const v=localStorage.getItem('Letterly_'+id);if(v!==null)el.value=v;});})();
+
+document.addEventListener('input',e=>{const id=e.target.id;if(!id)return;localStorage.setItem('Letterly_'+id,e.target.value);});
+
+function buildPrompt(){
+  const tmpl=TEMPLATES.find(t=>t.id===templateSelect.value)||TEMPLATES[0];
+  const topic=document.getElementById('topic-input').value.trim();
+  const name=document.getElementById('student-name').value.trim();
+  const school=document.getElementById('student-school').value.trim();
+  const program=document.getElementById('student-program').value.trim();
+  const location=document.getElementById('student-location').value.trim();
+  const tone=document.getElementById('tone-select').value;
+  const profileParts=[];if(name)profileParts.push(`Name: ${name}`);if(school)profileParts.push(`Institution: ${school}`);if(program)profileParts.push(`Programme: ${program}`);if(location)profileParts.push(`Location: ${location}`);
+  const profileText=profileParts.length?`\n\nMy details:\n${profileParts.join('\n')}`:'';
+  let toneGuide='Tone: formal academic / official.';
+  if(tone==='semi-formal')toneGuide='Tone: polite, friendly student English.';
+  else if(tone==='simple')toneGuide='Tone: clear, simple English for broad audience.';
+  else if(tone==='pidgin-hybrid')toneGuide='Tone: mostly standard English; include 1-2 light Naija expressions only.';
+  const userPrompt=`${tmpl.promptFrame}\n\n${toneGuide}${profileText}\n\nTopic / purpose: ${topic}`;
+  return userPrompt;
+}
+
+const form=document.getElementById('generator-form');
+const outputWrapper=document.getElementById('output-wrapper');
+const outputBox=document.getElementById('output-box');
+const genBtn=document.getElementById('generate-btn');
+
+form.addEventListener('submit',async e=>{
+  e.preventDefault();
+  const apiKey=document.getElementById('api-key-input').value.trim();
+  const prompt=buildPrompt();
+  outputWrapper.classList.add('active');
+  outputBox.textContent='Generating...';
+  genBtn.disabled=true;genBtn.textContent='Generating...';
+  try{
+    if(!apiKey){
+      /* offline demo fallback */
+      await new Promise(r=>setTimeout(r,800));
+      outputBox.textContent='[DEMO MODE]\n\nThis is where your AI-generated letter will appear. Add an OpenAI API key to get real output.';
+    }else{
+      const resp=await fetch('https://api.openai.com/v1/chat/completions',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':`Bearer ${apiKey}`},
+        body:JSON.stringify({
+          model:'gpt-4o-mini',
+          messages:[
+            {role:'system',content:'You draft polished letters & essays for Nigerian students. Use proper formatting, polite closings, correct spelling.'},
+            {role:'user',content:prompt}
+          ],
+          temperature:0.7,
+          max_tokens:800
+        })
+      });
+      if(!resp.ok){throw new Error('API error '+resp.status);} 
+      const data=await resp.json();
+      const text=data?.choices?.[0]?.message?.content?.trim()||'[No content returned]';
+      outputBox.textContent=text;
+    }
+  }catch(err){
+    console.error(err);outputBox.textContent='Error: '+err.message;
+  }finally{
+    genBtn.disabled=false;genBtn.textContent='Generate';
+  }
+});
+
+/* copy */
+const copyBtn=document.getElementById('copy-btn');
+copyBtn.addEventListener('click',()=>{const txt=outputBox.textContent;if(!txt)return;navigator.clipboard.writeText(txt).then(()=>{alert('Copied!');});});
+
+/* pdf */
+const pdfBtn=document.getElementById('pdf-btn');
+pdfBtn.addEventListener('click',()=>{const txt=outputBox.textContent;if(!txt)return;const{jsPDF}=window.jspdf;const doc=new jsPDF({unit:'pt',format:'a4'});const margin=40;const pageWidth=doc.internal.pageSize.getWidth()-margin*2;const lines=doc.splitTextToSize(txt,pageWidth);let y=margin;const lineHeight=16;lines.forEach(line=>{if(y>doc.internal.pageSize.getHeight()-margin){doc.addPage();y=margin;}doc.text(line,margin,y);y+=lineHeight;});doc.save('letterly-ai-letter.pdf');});
+
+/* clear */
+const resetBtn=document.getElementById('reset-btn');
+resetBtn.addEventListener('click',()=>{outputBox.textContent='';outputWrapper.classList.remove('active');});
+
+/* scroll helpers */
+document.querySelectorAll('[data-scroll]').forEach(el=>{el.addEventListener('click',()=>{const sel=el.getAttribute('data-scroll');const tgt=document.querySelector(sel);if(tgt)window.scrollTo({top:tgt.offsetTop-16,behavior:'smooth'});});});
+
+/* export gist */
+const gistLink=document.getElementById('export-gist-link');
+gistLink.addEventListener('click',async e=>{e.preventDefault();const pat=prompt('Enter a GitHub Personal Access Token with gist scope (optional). Leave blank to cancel.');if(!pat)return;const content=document.documentElement.outerHTML;try{const resp=await fetch('https://api.github.com/gists',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${pat}`},body:JSON.stringify({description:'Letterly AI (3MTT demo)',public:true,files:{'index.html':{content}}})});const data=await resp.json();if(data?.html_url){alert('Created Gist: '+data.html_url+'\nFork it & enable GitHub Pages.');}else{alert('Failed to create gist. Check console.');console.log(data);} }catch(err){alert('Error creating gist: '+err.message);} });
+</script>
+</body>
+</html>
